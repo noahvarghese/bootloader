@@ -1,15 +1,23 @@
-GFLAGS=-m32
-LDFLAGS=-nostdlib -ffreestanding
+GFLAGS=--32
+LDFLAGS=--oformat binary -nostdlib -ffreestanding -shared -melf_i386
 
-BOOTLOADER=hello_world
-BOOTLOADER_SRC=src/hellow_world.s
-BOOTLOADER_OBJS=$(BOOTLOADER_SRC:.s=.o)
+ENTRY=bootloader
+SRC_DIR=src
+SRCS=$(wildcard ./$(SRC_DIR)/*.s)
+OBJS=$(SRCS:.s=.o)
+
+OUTPUT_PATH=bin
+
+
+ASM=as
 
 dirs:
-	mkdir -p bin
+	mkdir -p ./$(OUTPUT_PATH)/ 
 
 clean:
-	rm ./**/*.o
+	- rm ./$(SRC_DIR)/*.o ; \
+	rm ./$(OUTPUT_PATH)/* ; \
+	clear
 
 # This will assemble all .s (assembly) files to .o (object) files
 # ASM is a Makefile variable for the assembler
@@ -19,11 +27,9 @@ clean:
 # This will link the object files into a binary
 # LD is a Makefile variable for the linker 
 # -Ttext sets the address of the .text section
-binary: $(BOOTLOADER_OBJS)
-	$(LD) -o ./bin/$(BOOTSECT) $^ $(LDFLAGS) -Ttext 0x0
+binary: $(OBJS)
+	$(LD) -o ./$(OUTPUT_PATH)/$(ENTRY) $^ $(LDFLAGS) -Ttext 0x0
 
-# TODO: start implementing bootloader to run this
-#
-# iso:
-# 	dd if=/dev/zero of=boot.iso bs=512 count=2880
-# 	dd if=./bin/$(BOOTSECT) of=boot.iso conv=notrunc bs=512 count=1
+iso:
+	dd if=/dev/zero of=./$(OUTPUT_PATH)/$(ENTRY).iso bs=1 count=512 && \
+	dd if=./$(OUTPUT_PATH)/$(ENTRY) of=./$(OUTPUT_PATH)/$(ENTRY).iso conv=notrunc bs=512 count=1

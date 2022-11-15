@@ -1,5 +1,4 @@
 ENTRY=hello_world
-SRC=index.s
 S_SRCS=$(wildcard *.s)
 S_OBJS=$(S_SRCS:.s=.o)
 ASM=as
